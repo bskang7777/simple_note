@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📅 스마트 스케줄러</title>
+    <link rel="stylesheet" href="schedule-style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- 사이드바 -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1><i class="fas fa-calendar-alt"></i> 스마트 스케줄러</h1>
+                <button id="newTaskBtn" class="new-task-btn">
+                    <i class="fas fa-plus"></i> 새 할일
+                </button>
+            </div>
+            
+            <div class="date-navigator">
+                <div class="current-date">
+                    <h2 id="currentDate">2024년 1월 15일</h2>
+                    <p id="currentDay">월요일</p>
+                </div>
+                <div class="date-controls">
+                    <button id="prevDay" class="date-btn">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <button id="todayBtn" class="today-btn">오늘</button>
+                    <button id="nextDay" class="date-btn">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="quick-stats">
+                <div class="stat-card">
+                    <div class="stat-icon urgent">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-number" id="urgentCount">0</span>
+                        <span class="stat-label">긴급</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon important">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-number" id="importantCount">0</span>
+                        <span class="stat-label">중요</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon completed">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-number" id="completedCount">0</span>
+                        <span class="stat-label">완료</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="filter-section">
+                <h3>필터</h3>
+                <div class="filter-options">
+                    <button class="filter-btn active" data-filter="all">
+                        <i class="fas fa-list"></i> 전체
+                    </button>
+                    <button class="filter-btn" data-filter="urgent">
+                        <i class="fas fa-exclamation-triangle"></i> 긴급
+                    </button>
+                    <button class="filter-btn" data-filter="important">
+                        <i class="fas fa-star"></i> 중요
+                    </button>
+                    <button class="filter-btn" data-filter="today">
+                        <i class="fas fa-calendar-day"></i> 오늘
+                    </button>
+                    <button class="filter-btn" data-filter="overdue">
+                        <i class="fas fa-clock"></i> 지연
+                    </button>
+                </div>
+            </div>
+
+            <div class="productivity-insights">
+                <h3>생산성 인사이트</h3>
+                <div class="insight-item">
+                    <div class="insight-label">완료율</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="completionRate" style="width: 0%"></div>
+                    </div>
+                    <span class="progress-text" id="completionText">0%</span>
+                </div>
+                <div class="insight-item">
+                    <div class="insight-label">평균 지연시간</div>
+                    <div class="insight-value" id="avgDelay">0시간</div>
+                </div>
+                <div class="insight-item">
+                    <div class="insight-label">가장 생산적인 시간</div>
+                    <div class="insight-value" id="peakTime">오전 9-11시</div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- 메인 콘텐츠 -->
+        <main class="main-content">
+            <header class="content-header">
+                <div class="header-left">
+                    <h2 id="scheduleTitle">오늘의 스케줄</h2>
+                    <span id="taskCount">0개의 할일</span>
+                </div>
+                <div class="header-right">
+                    <div class="view-options">
+                        <button class="view-btn active" data-view="timeline">
+                            <i class="fas fa-clock"></i> 타임라인
+                        </button>
+                        <button class="view-btn" data-view="list">
+                            <i class="fas fa-list"></i> 리스트
+                        </button>
+                        <button class="view-btn" data-view="calendar">
+                            <i class="fas fa-calendar"></i> 캘린더
+                        </button>
+                    </div>
+                    <button id="insightsBtn" class="insights-btn">
+                        <i class="fas fa-chart-line"></i> 인사이트
+                    </button>
+                </div>
+            </header>
+
+            <div class="schedule-container" id="scheduleContainer">
+                <!-- 타임라인 뷰 -->
+                <div class="timeline-view" id="timelineView">
+                    <div class="time-slots">
+                        <!-- 시간대별 슬롯이 동적으로 생성됩니다 -->
+                    </div>
+                </div>
+
+                <!-- 리스트 뷰 -->
+                <div class="list-view hidden" id="listView">
+                    <div class="task-list" id="taskList">
+                        <!-- 할일 리스트가 동적으로 생성됩니다 -->
+                    </div>
+                </div>
+
+                <!-- 캘린더 뷰 -->
+                <div class="calendar-view hidden" id="calendarView">
+                    <div class="calendar-header">
+                        <button id="prevMonth" class="month-btn">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <h3 id="currentMonth">2024년 1월</h3>
+                        <button id="nextMonth" class="month-btn">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                    <div class="calendar-grid" id="calendarGrid">
+                        <!-- 캘린더 그리드가 동적으로 생성됩니다 -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="empty-state" id="emptyState">
+                <i class="fas fa-calendar-plus"></i>
+                <h3>할일이 없습니다</h3>
+                <p>새로운 할일을 추가해보세요!</p>
+                <button id="emptyNewTaskBtn" class="new-task-btn">첫 할일 추가하기</button>
+            </div>
+        </main>
+    </div>
+
+    <!-- 할일 추가/편집 모달 -->
+    <div class="modal" id="taskModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">
+                    <input type="text" id="taskTitle" placeholder="할일 제목을 입력하세요...">
+                </div>
+                <div class="modal-actions">
+                    <button id="saveTaskBtn" class="save-btn">
+                        <i class="fas fa-save"></i> 저장
+                    </button>
+                    <button id="closeModalBtn" class="close-btn">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="modal-body">
+                <div class="task-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>설명</label>
+                            <textarea id="taskDescription" placeholder="할일에 대한 상세 설명..."></textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>시작 시간</label>
+                            <input type="datetime-local" id="taskStartTime">
+                        </div>
+                        <div class="form-group">
+                            <label>종료 시간</label>
+                            <input type="datetime-local" id="taskEndTime">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>중요도</label>
+                            <div class="priority-selector">
+                                <button class="priority-btn" data-priority="low">
+                                    <i class="fas fa-arrow-down"></i> 낮음
+                                </button>
+                                <button class="priority-btn active" data-priority="medium">
+                                    <i class="fas fa-minus"></i> 보통
+                                </button>
+                                <button class="priority-btn" data-priority="high">
+                                    <i class="fas fa-arrow-up"></i> 높음
+                                </button>
+                                <button class="priority-btn" data-priority="urgent">
+                                    <i class="fas fa-exclamation-triangle"></i> 긴급
+                                </button>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>카테고리</label>
+                            <select id="taskCategory">
+                                <option value="work">업무</option>
+                                <option value="personal">개인</option>
+                                <option value="health">건강</option>
+                                <option value="study">학습</option>
+                                <option value="social">사회활동</option>
+                                <option value="other">기타</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>반복</label>
+                            <select id="taskRepeat">
+                                <option value="none">반복 안함</option>
+                                <option value="daily">매일</option>
+                                <option value="weekly">매주</option>
+                                <option value="monthly">매월</option>
+                                <option value="yearly">매년</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>알림</label>
+                            <select id="taskReminder">
+                                <option value="none">알림 없음</option>
+                                <option value="5">5분 전</option>
+                                <option value="15">15분 전</option>
+                                <option value="30">30분 전</option>
+                                <option value="60">1시간 전</option>
+                                <option value="1440">1일 전</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group full-width">
+                            <label>태그</label>
+                            <input type="text" id="taskTags" placeholder="태그를 입력하세요 (쉼표로 구분)">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 인사이트 모달 -->
+    <div class="modal" id="insightsModal">
+        <div class="modal-content insights-modal">
+            <div class="modal-header">
+                <h3><i class="fas fa-chart-line"></i> 생산성 인사이트</h3>
+                <button id="closeInsightsBtn" class="close-btn">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="insights-grid">
+                    <div class="insight-card">
+                        <h4>완료율 분석</h4>
+                        <div class="insight-content">
+                            <div class="chart-container">
+                                <canvas id="completionChart"></canvas>
+                            </div>
+                            <p>이번 주 완료율: <span id="weeklyCompletion">75%</span></p>
+                            <p>지난 주 대비: <span id="completionTrend">+5%</span></p>
+                        </div>
+                    </div>
+                    
+                    <div class="insight-card">
+                        <h4>중요도별 성과</h4>
+                        <div class="insight-content">
+                            <div class="priority-stats">
+                                <div class="priority-stat">
+                                    <span class="priority-label urgent">긴급</span>
+                                    <span class="priority-value" id="urgentCompletion">90%</span>
+                                </div>
+                                <div class="priority-stat">
+                                    <span class="priority-label high">높음</span>
+                                    <span class="priority-value" id="highCompletion">85%</span>
+                                </div>
+                                <div class="priority-stat">
+                                    <span class="priority-label medium">보통</span>
+                                    <span class="priority-value" id="mediumCompletion">70%</span>
+                                </div>
+                                <div class="priority-stat">
+                                    <span class="priority-label low">낮음</span>
+                                    <span class="priority-value" id="lowCompletion">60%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="insight-card">
+                        <h4>시간대별 생산성</h4>
+                        <div class="insight-content">
+                            <div class="time-productivity">
+                                <div class="time-slot">
+                                    <span>오전 (6-12시)</span>
+                                    <div class="productivity-bar">
+                                        <div class="productivity-fill" style="width: 85%"></div>
+                                    </div>
+                                    <span>85%</span>
+                                </div>
+                                <div class="time-slot">
+                                    <span>오후 (12-18시)</span>
+                                    <div class="productivity-bar">
+                                        <div class="productivity-fill" style="width: 70%"></div>
+                                    </div>
+                                    <span>70%</span>
+                                </div>
+                                <div class="time-slot">
+                                    <span>저녁 (18-24시)</span>
+                                    <div class="productivity-bar">
+                                        <div class="productivity-fill" style="width: 55%"></div>
+                                    </div>
+                                    <span>55%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="insight-card">
+                        <h4>스마트 추천</h4>
+                        <div class="insight-content">
+                            <ul id="recommendations">
+                                <li>긴급한 할일을 오전 시간대에 배치하세요</li>
+                                <li>복잡한 작업은 90분 단위로 나누어 진행하세요</li>
+                                <li>지연된 할일이 3개 있습니다. 우선순위를 재검토하세요</li>
+                                <li>매주 목요일이 가장 생산적입니다</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="schedule-script.js"></script>
+</body>
+</html>
