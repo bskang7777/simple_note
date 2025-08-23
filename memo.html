@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📝 인사이트 메모장</title>
+    <link rel="stylesheet" href="memo-style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- 사이드바 -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1><i class="fas fa-brain"></i> 인사이트</h1>
+                <button id="newMemoBtn" class="new-memo-btn">
+                    <i class="fas fa-plus"></i> 새 메모
+                </button>
+            </div>
+            
+            <div class="search-section">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchInput" placeholder="메모 검색...">
+                </div>
+            </div>
+
+            <div class="filter-section">
+                <h3>필터</h3>
+                <div class="filter-options">
+                    <button class="filter-btn active" data-filter="all">
+                        <i class="fas fa-list"></i> 전체
+                    </button>
+                    <button class="filter-btn" data-filter="important">
+                        <i class="fas fa-star"></i> 중요
+                    </button>
+                    <button class="filter-btn" data-filter="recent">
+                        <i class="fas fa-clock"></i> 최근
+                    </button>
+                    <button class="filter-btn" data-filter="favorites">
+                        <i class="fas fa-heart"></i> 즐겨찾기
+                    </button>
+                </div>
+            </div>
+
+            <div class="tags-section">
+                <h3>태그</h3>
+                <div id="tagsList" class="tags-list">
+                    <!-- 태그들이 동적으로 추가됩니다 -->
+                </div>
+            </div>
+
+            <div class="stats-section">
+                <h3>통계</h3>
+                <div class="stats">
+                    <div class="stat-item">
+                        <span class="stat-number" id="totalMemos">0</span>
+                        <span class="stat-label">총 메모</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number" id="totalWords">0</span>
+                        <span class="stat-label">총 단어</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number" id="avgLength">0</span>
+                        <span class="stat-label">평균 길이</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- 메인 콘텐츠 -->
+        <main class="main-content">
+            <header class="content-header">
+                <div class="header-left">
+                    <h2 id="currentView">전체 메모</h2>
+                    <span id="memoCount">0개의 메모</span>
+                </div>
+                <div class="header-right">
+                    <div class="view-options">
+                        <button class="view-btn active" data-view="grid">
+                            <i class="fas fa-th"></i>
+                        </button>
+                        <button class="view-btn" data-view="list">
+                            <i class="fas fa-list"></i>
+                        </button>
+                    </div>
+                    <div class="sort-options">
+                        <select id="sortSelect">
+                            <option value="date-desc">최신순</option>
+                            <option value="date-asc">오래된순</option>
+                            <option value="title">제목순</option>
+                            <option value="length">길이순</option>
+                            <option value="importance">중요도순</option>
+                        </select>
+                    </div>
+                </div>
+            </header>
+
+            <div class="memos-container" id="memosContainer">
+                <!-- 메모 카드들이 여기에 동적으로 추가됩니다 -->
+            </div>
+
+            <div class="empty-state" id="emptyState">
+                <i class="fas fa-edit"></i>
+                <h3>메모가 없습니다</h3>
+                <p>새로운 메모를 작성해보세요!</p>
+                <button id="emptyNewMemoBtn" class="new-memo-btn">첫 메모 작성하기</button>
+            </div>
+        </main>
+    </div>
+
+    <!-- 메모 편집 모달 -->
+    <div class="modal" id="memoModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">
+                    <input type="text" id="memoTitle" placeholder="메모 제목을 입력하세요...">
+                </div>
+                <div class="modal-actions">
+                    <button id="saveMemoBtn" class="save-btn">
+                        <i class="fas fa-save"></i> 저장
+                    </button>
+                    <button id="closeModalBtn" class="close-btn">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="modal-body">
+                <div class="memo-toolbar">
+                    <div class="toolbar-left">
+                        <button class="tool-btn" data-action="bold">
+                            <i class="fas fa-bold"></i>
+                        </button>
+                        <button class="tool-btn" data-action="italic">
+                            <i class="fas fa-italic"></i>
+                        </button>
+                        <button class="tool-btn" data-action="underline">
+                            <i class="fas fa-underline"></i>
+                        </button>
+                        <button class="tool-btn" data-action="list">
+                            <i class="fas fa-list-ul"></i>
+                        </button>
+                        <button class="tool-btn" data-action="link">
+                            <i class="fas fa-link"></i>
+                        </button>
+                    </div>
+                    <div class="toolbar-right">
+                        <button class="tool-btn" id="toggleImportant" title="중요 표시">
+                            <i class="far fa-star"></i>
+                        </button>
+                        <button class="tool-btn" id="toggleFavorite" title="즐겨찾기">
+                            <i class="far fa-heart"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="memo-content">
+                    <textarea id="memoContent" placeholder="메모 내용을 입력하세요...&#10;&#10;마크다운 문법을 지원합니다:&#10;# 제목&#10;## 부제목&#10;**굵게** *기울임*&#10;- 목록 항목&#10;[링크](URL)"></textarea>
+                </div>
+                <div class="memo-tags">
+                    <div class="tags-input">
+                        <i class="fas fa-tags"></i>
+                        <input type="text" id="tagsInput" placeholder="태그를 입력하세요 (Enter로 구분)">
+                    </div>
+                    <div id="memoTags" class="memo-tags-list">
+                        <!-- 태그들이 여기에 표시됩니다 -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 인사이트 모달 -->
+    <div class="modal" id="insightsModal">
+        <div class="modal-content insights-modal">
+            <div class="modal-header">
+                <h3><i class="fas fa-chart-line"></i> 메모 인사이트</h3>
+                <button id="closeInsightsBtn" class="close-btn">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="insights-grid">
+                    <div class="insight-card">
+                        <h4>작성 패턴</h4>
+                        <div class="insight-content">
+                            <p>가장 활발한 시간: <span id="peakTime">오후 2-4시</span></p>
+                            <p>평균 메모 길이: <span id="avgMemoLength">150자</span></p>
+                            <p>주요 주제: <span id="mainTopics">개발, 아이디어, 회의</span></p>
+                        </div>
+                    </div>
+                    <div class="insight-card">
+                        <h4>태그 분석</h4>
+                        <div class="insight-content">
+                            <div id="tagCloud" class="tag-cloud">
+                                <!-- 태그 클라우드가 여기에 표시됩니다 -->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="insight-card">
+                        <h4>생산성 지표</h4>
+                        <div class="insight-content">
+                            <p>이번 주 작성: <span id="weeklyCount">12개</span></p>
+                            <p>완료율: <span id="completionRate">85%</span></p>
+                            <p>중요 메모: <span id="importantCount">8개</span></p>
+                        </div>
+                    </div>
+                    <div class="insight-card">
+                        <h4>추천 사항</h4>
+                        <div class="insight-content">
+                            <ul id="recommendations">
+                                <li>자주 사용하는 태그를 즐겨찾기에 추가해보세요</li>
+                                <li>긴 메모는 여러 개로 나누어 작성하는 것을 고려해보세요</li>
+                                <li>중요한 메모에 별표를 더 활용해보세요</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="memo-script.js"></script>
+</body>
+</html>
