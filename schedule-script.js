@@ -176,10 +176,15 @@ class SmartScheduler {
             this.taskTags.value = task.tags ? task.tags.join(', ') : '';
             this.setPriority(task.priority);
         } else {
+            // 새 할일 생성 시 기본값 설정
+            const now = new Date();
+            const tomorrow = new Date(now);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            
             this.taskTitle.value = '';
             this.taskDescription.value = '';
-            this.taskStartTime.value = '';
-            this.taskEndTime.value = '';
+            this.taskStartTime.value = this.formatDateTimeLocal(now);
+            this.taskEndTime.value = this.formatDateTimeLocal(tomorrow);
             this.taskCategory.value = 'work';
             this.taskRepeat.value = 'none';
             this.taskReminder.value = 'none';
