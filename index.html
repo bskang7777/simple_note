@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo List</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📝 Todo List</h1>
+            <p>할 일을 관리해보세요!</p>
+        </header>
+        
+        <div class="todo-input-section">
+            <div class="input-group">
+                <input type="text" id="todoInput" placeholder="할 일을 입력하세요..." maxlength="100">
+                <button id="addBtn" class="add-btn">추가</button>
+            </div>
+        </div>
+
+        <div class="todo-filters">
+            <button class="filter-btn active" data-filter="all">전체</button>
+            <button class="filter-btn" data-filter="active">진행중</button>
+            <button class="filter-btn" data-filter="completed">완료</button>
+        </div>
+
+        <div class="todo-stats">
+            <span id="todoCount">총 0개</span>
+            <button id="clearCompleted" class="clear-btn">완료된 항목 삭제</button>
+        </div>
+
+        <ul id="todoList" class="todo-list">
+            <!-- Todo 항목들이 여기에 동적으로 추가됩니다 -->
+        </ul>
+
+        <div class="empty-state" id="emptyState">
+            <p>할 일이 없습니다. 새로운 할 일을 추가해보세요!</p>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
