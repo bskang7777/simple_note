@@ -254,6 +254,71 @@ body {
     font-weight: 500;
 }
 
+/* 완료된 할일 섹션 */
+.completed-tasks-panel {
+    padding: 20px;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.completed-tasks-panel h3 {
+    font-size: 0.9rem;
+    color: #6c757d;
+    margin-bottom: 15px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.completed-tasks-list {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.completed-task-item {
+    padding: 12px;
+    border: 1px solid #e9ecef;
+    border-radius: 6px;
+    margin-bottom: 10px;
+    background: white;
+    transition: all 0.3s ease;
+}
+
+.completed-task-item:hover {
+    background: #f8f9fa;
+    transform: translateY(-1px);
+}
+
+.completed-task-title {
+    font-weight: 500;
+    color: #333;
+    margin-bottom: 5px;
+    text-decoration: line-through;
+    opacity: 0.8;
+    font-size: 0.85rem;
+}
+
+.completed-task-time {
+    font-size: 0.75rem;
+    color: #6c757d;
+    margin-bottom: 5px;
+}
+
+.completed-task-category {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    color: white;
+    font-weight: 500;
+}
+
+.no-completed-tasks {
+    text-align: center;
+    color: #6c757d;
+    font-style: italic;
+    padding: 20px;
+    font-size: 0.85rem;
+}
+
 /* 메인 콘텐츠 */
 .main-content {
     flex: 1;
@@ -409,6 +474,102 @@ body {
 .task-item.completed {
     opacity: 0.6;
     background: #e9ecef;
+}
+
+.task-item.dragging {
+    opacity: 0.5;
+    transform: rotate(5deg);
+    z-index: 1000;
+}
+
+.time-slot.drag-over {
+    background: #e3f2fd;
+    border-color: #667eea;
+}
+
+.calendar-day.drag-over {
+    background: #e3f2fd;
+    border: 2px solid #667eea;
+}
+
+.resize-handle {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 4px;
+    cursor: ns-resize;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 2px;
+    transition: background 0.3s ease;
+}
+
+.resize-handle:hover {
+    background: rgba(255, 255, 255, 0.6);
+}
+
+.resize-top {
+    top: 0;
+}
+
+.resize-bottom {
+    bottom: 0;
+}
+
+.task-item {
+    position: relative;
+    cursor: grab;
+}
+
+.task-item:active {
+    cursor: grabbing;
+}
+
+.task-delete-btn {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 0.7rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: all 0.3s ease;
+}
+
+.task-item:hover .task-delete-btn {
+    opacity: 1;
+}
+
+.task-delete-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.1);
+}
+
+/* 빠른 추가를 위한 시각적 피드백 */
+.time-slot:hover,
+.week-day-slot:hover {
+    background: #f8f9fa;
+    cursor: pointer;
+}
+
+.time-slot:hover::after,
+.week-day-slot:hover::after {
+    content: '+';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1.5rem;
+    color: #667eea;
+    opacity: 0.5;
+    pointer-events: none;
 }
 
 .task-title {
@@ -614,6 +775,193 @@ body {
     color: #155724;
 }
 
+/* 주간 뷰 */
+.week-view {
+    height: 100%;
+    padding: 20px;
+}
+
+.week-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.week-btn {
+    padding: 8px 12px;
+    background: white;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.week-btn:hover {
+    background: #f8f9fa;
+}
+
+#currentWeek {
+    font-size: 1.2rem;
+    color: #333;
+}
+
+.week-grid {
+    display: grid;
+    grid-template-columns: 80px repeat(7, 1fr);
+    gap: 1px;
+    background: #e9ecef;
+    border-radius: 8px;
+    overflow: hidden;
+    height: calc(100% - 80px);
+    overflow-y: auto;
+    max-height: calc(100vh - 200px);
+}
+
+.week-time-header {
+    background: #f8f9fa;
+    padding: 10px;
+    font-weight: 600;
+    color: #6c757d;
+    border-right: 1px solid #e9ecef;
+}
+
+.week-day-header {
+    background: #f8f9fa;
+    padding: 10px;
+    text-align: center;
+    font-weight: 600;
+    color: #6c757d;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.week-time-slot {
+    background: white;
+    padding: 5px;
+    border-right: 1px solid #e9ecef;
+    min-height: 60px;
+    position: relative;
+}
+
+.week-day-slot {
+    background: white;
+    padding: 5px;
+    min-height: 60px;
+    position: relative;
+}
+
+.week-task {
+    position: absolute;
+    left: 2px;
+    right: 2px;
+    padding: 4px 6px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    color: white;
+    cursor: pointer;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    z-index: 10;
+    transition: all 0.3s ease;
+}
+
+.week-task:hover {
+    transform: scale(1.02);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.week-task.dragging {
+    opacity: 0.5;
+    transform: rotate(5deg);
+}
+
+.week-day-slot.drag-over {
+    background: rgba(102, 126, 234, 0.1);
+    border: 2px dashed #667eea;
+}
+
+/* 월간 뷰 */
+.month-view {
+    height: 100%;
+    padding: 20px;
+}
+
+.month-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+#currentMonthView {
+    font-size: 1.2rem;
+    color: #333;
+}
+
+.month-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 1px;
+    background: #e9ecef;
+    border-radius: 8px;
+    overflow: hidden;
+    height: calc(100% - 80px);
+}
+
+.month-day {
+    background: white;
+    padding: 10px;
+    min-height: 120px;
+    position: relative;
+}
+
+.month-day.other-month {
+    background: #f8f9fa;
+    color: #adb5bd;
+}
+
+.month-day.today {
+    background: #e3f2fd;
+}
+
+.month-day-number {
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.month-day-tasks {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.month-task {
+    font-size: 0.7rem;
+    padding: 2px 4px;
+    border-radius: 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.month-task:hover {
+    transform: scale(1.05);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+}
+
+.month-task.dragging {
+    opacity: 0.5;
+    transform: rotate(5deg);
+}
+
+.month-day.drag-over {
+    background: rgba(102, 126, 234, 0.1);
+    border: 2px dashed #667eea;
+}
+
 /* 모달 */
 .modal {
     display: none;
@@ -668,7 +1016,7 @@ body {
     gap: 10px;
 }
 
-.save-btn, .close-btn {
+.save-btn, .close-btn, .delete-btn, .email-btn {
     padding: 8px 16px;
     border: none;
     border-radius: 6px;
@@ -693,6 +1041,24 @@ body {
 
 .close-btn:hover {
     background: #5a6268;
+}
+
+.delete-btn {
+    background: #dc3545;
+    color: white;
+}
+
+.delete-btn:hover {
+    background: #c82333;
+}
+
+.email-btn {
+    background: #28a745;
+    color: white;
+}
+
+.email-btn:hover {
+    background: #218838;
 }
 
 .modal-body {
@@ -749,6 +1115,108 @@ body {
 .form-group textarea {
     resize: vertical;
     min-height: 80px;
+}
+
+/* 회의록/문서 섹션 */
+.meeting-notes-section {
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    padding: 15px;
+    background: #f8f9fa;
+}
+
+.meeting-notes-section textarea {
+    width: 100%;
+    min-height: 100px;
+    margin-bottom: 10px;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    padding: 10px;
+    font-size: 0.9rem;
+    resize: vertical;
+}
+
+.notes-actions {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.note-btn {
+    padding: 8px 12px;
+    background: #667eea;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: all 0.3s ease;
+}
+
+.note-btn:hover {
+    background: #5a6fd8;
+}
+
+.notes-list {
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.note-item {
+    background: white;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    padding: 10px;
+    margin-bottom: 8px;
+}
+
+.note-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 5px;
+}
+
+.note-title {
+    flex: 1;
+    font-weight: 500;
+    color: #333;
+}
+
+.note-delete-btn {
+    background: none;
+    border: none;
+    color: #dc3545;
+    cursor: pointer;
+    padding: 2px 6px;
+    border-radius: 3px;
+    transition: all 0.3s ease;
+}
+
+.note-delete-btn:hover {
+    background: #dc3545;
+    color: white;
+}
+
+.note-text {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 5px;
+    line-height: 1.4;
+}
+
+.note-meta {
+    display: flex;
+    gap: 15px;
+    font-size: 0.75rem;
+    color: #6c757d;
+}
+
+.no-notes {
+    text-align: center;
+    color: #6c757d;
+    font-style: italic;
+    padding: 20px;
 }
 
 .priority-selector {
@@ -877,6 +1345,118 @@ body {
     height: 100%;
     background: linear-gradient(90deg, #667eea, #764ba2);
     border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+/* 자기개발 진행도 */
+.development-progress {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.progress-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.progress-item span:first-child {
+    min-width: 80px;
+    font-size: 0.9rem;
+    color: #6c757d;
+}
+
+.progress-bar {
+    flex: 1;
+    height: 8px;
+    background: #e9ecef;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #28a745, #20c997);
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+.progress-item span:last-child {
+    min-width: 40px;
+    text-align: right;
+    font-weight: 600;
+    color: #28a745;
+}
+
+/* 습관 분석 */
+.habit-analysis {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.habit-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    background: #f8f9fa;
+    border-radius: 6px;
+    border-left: 4px solid #667eea;
+}
+
+.habit-name {
+    font-weight: 600;
+    color: #333;
+}
+
+.habit-streak {
+    color: #28a745;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.habit-success-rate {
+    color: #6c757d;
+    font-size: 0.8rem;
+}
+
+/* 목표 달성 현황 */
+.goal-status {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.goal-item {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.goal-title {
+    font-weight: 600;
+    color: #333;
+}
+
+.goal-progress {
+    font-size: 0.9rem;
+    color: #6c757d;
+}
+
+.goal-bar {
+    height: 6px;
+    background: #e9ecef;
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.goal-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #ffc107, #fd7e14);
+    border-radius: 3px;
+    transition: width 0.3s ease;
 }
 
 .time-slot span:last-child {

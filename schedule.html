@@ -103,6 +103,13 @@
                     <div class="insight-value" id="peakTime">오전 9-11시</div>
                 </div>
             </div>
+            
+            <div class="completed-tasks-panel">
+                <h3>완료된 할일</h3>
+                <div class="completed-tasks-list" id="completedTasksList">
+                    <!-- 완료된 할일들이 동적으로 생성됩니다 -->
+                </div>
+            </div>
         </aside>
 
         <!-- 메인 콘텐츠 -->
@@ -122,6 +129,12 @@
                         </button>
                         <button class="view-btn" data-view="calendar">
                             <i class="fas fa-calendar"></i> 캘린더
+                        </button>
+                        <button class="view-btn" data-view="week">
+                            <i class="fas fa-calendar-week"></i> 주간
+                        </button>
+                        <button class="view-btn" data-view="month">
+                            <i class="fas fa-calendar-alt"></i> 월간
                         </button>
                     </div>
                     <button id="insightsBtn" class="insights-btn">
@@ -160,6 +173,38 @@
                         <!-- 캘린더 그리드가 동적으로 생성됩니다 -->
                     </div>
                 </div>
+
+                <!-- 주간 뷰 -->
+                <div class="week-view hidden" id="weekView">
+                    <div class="week-header">
+                        <button id="prevWeek" class="week-btn">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <h3 id="currentWeek">2024년 1월 15일 - 21일</h3>
+                        <button id="nextWeek" class="week-btn">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                    <div class="week-grid" id="weekGrid">
+                        <!-- 주간 그리드가 동적으로 생성됩니다 -->
+                    </div>
+                </div>
+
+                <!-- 월간 뷰 -->
+                <div class="month-view hidden" id="monthView">
+                    <div class="month-header">
+                        <button id="prevMonthView" class="month-btn">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <h3 id="currentMonthView">2024년 1월</h3>
+                        <button id="nextMonthView" class="month-btn">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                    <div class="month-grid" id="monthGrid">
+                        <!-- 월간 그리드가 동적으로 생성됩니다 -->
+                    </div>
+                </div>
             </div>
 
             <div class="empty-state" id="emptyState">
@@ -181,6 +226,12 @@
                 <div class="modal-actions">
                     <button id="saveTaskBtn" class="save-btn">
                         <i class="fas fa-save"></i> 저장
+                    </button>
+                    <button id="deleteTaskBtn" class="delete-btn" style="display: none;">
+                        <i class="fas fa-trash"></i> 삭제
+                    </button>
+                    <button id="emailTaskBtn" class="email-btn" style="display: none;">
+                        <i class="fas fa-envelope"></i> 이메일
                     </button>
                     <button id="closeModalBtn" class="close-btn">
                         <i class="fas fa-times"></i>
@@ -266,6 +317,26 @@
                         <div class="form-group full-width">
                             <label>태그</label>
                             <input type="text" id="taskTags" placeholder="태그를 입력하세요 (쉼표로 구분)">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group full-width">
+                            <label>회의록/문서</label>
+                            <div class="meeting-notes-section">
+                                <textarea id="meetingNotes" placeholder="회의록이나 문서 내용을 입력하세요..."></textarea>
+                                <div class="notes-actions">
+                                    <button type="button" id="addNoteBtn" class="note-btn">
+                                        <i class="fas fa-plus"></i> 메모 추가
+                                    </button>
+                                    <button type="button" id="attachFileBtn" class="note-btn">
+                                        <i class="fas fa-paperclip"></i> 파일 첨부
+                                    </button>
+                                </div>
+                                <div class="notes-list" id="notesList">
+                                    <!-- 메모들이 동적으로 생성됩니다 -->
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -357,6 +428,87 @@
                                 <li>지연된 할일이 3개 있습니다. 우선순위를 재검토하세요</li>
                                 <li>매주 목요일이 가장 생산적입니다</li>
                             </ul>
+                        </div>
+                    </div>
+
+                    <div class="insight-card">
+                        <h4>자기개발 진행도</h4>
+                        <div class="insight-content">
+                            <div class="development-progress">
+                                <div class="progress-item">
+                                    <span>학습 진행도</span>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" id="studyProgress" style="width: 65%"></div>
+                                    </div>
+                                    <span id="studyProgressText">65%</span>
+                                </div>
+                                <div class="progress-item">
+                                    <span>건강 관리</span>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" id="healthProgress" style="width: 80%"></div>
+                                    </div>
+                                    <span id="healthProgressText">80%</span>
+                                </div>
+                                <div class="progress-item">
+                                    <span>업무 성과</span>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" id="workProgress" style="width: 75%"></div>
+                                    </div>
+                                    <span id="workProgressText">75%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="insight-card">
+                        <h4>습관 분석</h4>
+                        <div class="insight-content">
+                            <div class="habit-analysis">
+                                <div class="habit-item">
+                                    <span class="habit-name">매일 운동</span>
+                                    <span class="habit-streak" id="exerciseStreak">연속 7일</span>
+                                    <span class="habit-success-rate">성공률: 85%</span>
+                                </div>
+                                <div class="habit-item">
+                                    <span class="habit-name">독서</span>
+                                    <span class="habit-streak" id="readingStreak">연속 3일</span>
+                                    <span class="habit-success-rate">성공률: 60%</span>
+                                </div>
+                                <div class="habit-item">
+                                    <span class="habit-name">명상</span>
+                                    <span class="habit-streak" id="meditationStreak">연속 12일</span>
+                                    <span class="habit-success-rate">성공률: 90%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="insight-card">
+                        <h4>목표 달성 현황</h4>
+                        <div class="insight-content">
+                            <div class="goal-status">
+                                <div class="goal-item">
+                                    <span class="goal-title">월간 목표</span>
+                                    <span class="goal-progress" id="monthlyGoalProgress">8/10 완료</span>
+                                    <div class="goal-bar">
+                                        <div class="goal-fill" style="width: 80%"></div>
+                                    </div>
+                                </div>
+                                <div class="goal-item">
+                                    <span class="goal-title">분기 목표</span>
+                                    <span class="goal-progress" id="quarterlyGoalProgress">15/20 완료</span>
+                                    <div class="goal-bar">
+                                        <div class="goal-fill" style="width: 75%"></div>
+                                    </div>
+                                </div>
+                                <div class="goal-item">
+                                    <span class="goal-title">연간 목표</span>
+                                    <span class="goal-progress" id="yearlyGoalProgress">45/60 완료</span>
+                                    <div class="goal-bar">
+                                        <div class="goal-fill" style="width: 75%"></div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
