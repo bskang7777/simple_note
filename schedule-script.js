@@ -409,39 +409,92 @@ class SmartScheduler {
 
     // 캘린더 드래그 오버 처리
     handleCalendarDragOver(e) {
+        e.preventDefault();
+        e.stopPropagation();
         const calendarDay = e.target.closest('.calendar-day');
-        if (calendarDay) {
+        if (calendarDay && this.draggedTask) {
+            // 기존 하이라이트 제거
+            document.querySelectorAll('.calendar-day.drag-over').forEach(day => {
+                day.classList.remove('drag-over');
+            });
             calendarDay.classList.add('drag-over');
+            
+            // 드래그 가능한 날짜인지 확인 (과거 날짜 제외)
+            const dayNumber = calendarDay.querySelector('.day-number');
+            if (dayNumber) {
+                const day = parseInt(dayNumber.textContent);
+                const year = this.currentDate.getFullYear();
+                const month = this.currentDate.getMonth();
+                const targetDate = new Date(year, month, day);
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                
+                if (targetDate < today) {
+                    calendarDay.classList.add('drag-disabled');
+                } else {
+                    calendarDay.classList.remove('drag-disabled');
+                }
+            }
         }
     }
 
-    // 캘린더 드롭 처리
+    // 캘린더 뷰 드롭 처리
     handleCalendarDrop(e) {
+        e.preventDefault();
+        e.stopPropagation();
         const calendarDay = e.target.closest('.calendar-day');
         if (calendarDay && this.draggedTask) {
             const dayNumber = calendarDay.querySelector('.day-number');
-            const day = parseInt(dayNumber.textContent);
-            const year = this.currentDate.getFullYear();
-            const month = this.currentDate.getMonth();
-            
-            const newDate = new Date(year, month, day);
-            const currentStartTime = new Date(this.draggedTask.startTime);
-            const currentEndTime = new Date(this.draggedTask.endTime);
-            const duration = currentEndTime.getTime() - currentStartTime.getTime();
-            
-            newDate.setHours(currentStartTime.getHours(), currentStartTime.getMinutes(), 0, 0);
-            const newEndDate = new Date(newDate.getTime() + duration);
-            
-            this.updateTaskTime(this.draggedTask.id, newDate, newEndDate);
+            if (dayNumber) {
+                const day = parseInt(dayNumber.textContent);
+                const year = this.currentDate.getFullYear();
+                const month = this.currentDate.getMonth();
+                const targetDate = new Date(year, month, day);
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                
+                // 과거 날짜로 드롭 방지
+                if (targetDate < today) {
+                    // 에러 피드백
+                    calendarDay.style.backgroundColor = '#dc3545';
+                    calendarDay.style.transition = 'background-color 0.3s';
+                    setTimeout(() => {
+                        calendarDay.style.backgroundColor = '';
+                        calendarDay.style.transition = '';
+                    }, 300);
+                    
+                    // 알림 메시지
+                    this.showNotification('과거 날짜로는 할일을 이동할 수 없습니다.', 'error');
+                } else {
+                    const currentStartTime = new Date(this.draggedTask.startTime);
+                    const currentEndTime = new Date(this.draggedTask.endTime);
+                    const duration = currentEndTime.getTime() - currentStartTime.getTime();
+                    
+                    const newDate = new Date(year, month, day, currentStartTime.getHours(), currentStartTime.getMinutes());
+                    const newEndDate = new Date(newDate.getTime() + duration);
+                    
+                    this.updateTaskTime(this.draggedTask.id, newDate, newEndDate);
+                    
+                    // 성공 피드백
+                    calendarDay.style.backgroundColor = '#28a745';
+                    calendarDay.style.transition = 'background-color 0.3s';
+                    setTimeout(() => {
+                        calendarDay.style.backgroundColor = '';
+                        calendarDay.style.transition = '';
+                    }, 300);
+                    
+                    // 성공 알림
+                    this.showNotification(`할일이 ${month + 1}월 ${day}일로 이동되었습니다.`, 'success');
+                }
+            }
         }
         
-        // 드래그 오버 스타일 제거
+        // 드래그 상태 정리
         document.querySelectorAll('.calendar-day').forEach(day => {
-            day.classList.remove('drag-over');
+            day.classList.remove('drag-over', 'drag-disabled');
         });
         
         this.draggedTask = null;
-        this.isDragging = false;
     }
 
     // 리사이즈 처리
@@ -653,39 +706,92 @@ class SmartScheduler {
 
     // 캘린더 드래그 오버 처리
     handleCalendarDragOver(e) {
+        e.preventDefault();
+        e.stopPropagation();
         const calendarDay = e.target.closest('.calendar-day');
-        if (calendarDay) {
+        if (calendarDay && this.draggedTask) {
+            // 기존 하이라이트 제거
+            document.querySelectorAll('.calendar-day.drag-over').forEach(day => {
+                day.classList.remove('drag-over');
+            });
             calendarDay.classList.add('drag-over');
+            
+            // 드래그 가능한 날짜인지 확인 (과거 날짜 제외)
+            const dayNumber = calendarDay.querySelector('.day-number');
+            if (dayNumber) {
+                const day = parseInt(dayNumber.textContent);
+                const year = this.currentDate.getFullYear();
+                const month = this.currentDate.getMonth();
+                const targetDate = new Date(year, month, day);
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                
+                if (targetDate < today) {
+                    calendarDay.classList.add('drag-disabled');
+                } else {
+                    calendarDay.classList.remove('drag-disabled');
+                }
+            }
         }
     }
 
-    // 캘린더 드롭 처리
+    // 캘린더 뷰 드롭 처리
     handleCalendarDrop(e) {
+        e.preventDefault();
+        e.stopPropagation();
         const calendarDay = e.target.closest('.calendar-day');
         if (calendarDay && this.draggedTask) {
             const dayNumber = calendarDay.querySelector('.day-number');
-            const day = parseInt(dayNumber.textContent);
-            const year = this.currentDate.getFullYear();
-            const month = this.currentDate.getMonth();
-            
-            const newDate = new Date(year, month, day);
-            const currentStartTime = new Date(this.draggedTask.startTime);
-            const currentEndTime = new Date(this.draggedTask.endTime);
-            const duration = currentEndTime.getTime() - currentStartTime.getTime();
-            
-            newDate.setHours(currentStartTime.getHours(), currentStartTime.getMinutes(), 0, 0);
-            const newEndDate = new Date(newDate.getTime() + duration);
-            
-            this.updateTaskTime(this.draggedTask.id, newDate, newEndDate);
+            if (dayNumber) {
+                const day = parseInt(dayNumber.textContent);
+                const year = this.currentDate.getFullYear();
+                const month = this.currentDate.getMonth();
+                const targetDate = new Date(year, month, day);
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                
+                // 과거 날짜로 드롭 방지
+                if (targetDate < today) {
+                    // 에러 피드백
+                    calendarDay.style.backgroundColor = '#dc3545';
+                    calendarDay.style.transition = 'background-color 0.3s';
+                    setTimeout(() => {
+                        calendarDay.style.backgroundColor = '';
+                        calendarDay.style.transition = '';
+                    }, 300);
+                    
+                    // 알림 메시지
+                    this.showNotification('과거 날짜로는 할일을 이동할 수 없습니다.', 'error');
+                } else {
+                    const currentStartTime = new Date(this.draggedTask.startTime);
+                    const currentEndTime = new Date(this.draggedTask.endTime);
+                    const duration = currentEndTime.getTime() - currentStartTime.getTime();
+                    
+                    const newDate = new Date(year, month, day, currentStartTime.getHours(), currentStartTime.getMinutes());
+                    const newEndDate = new Date(newDate.getTime() + duration);
+                    
+                    this.updateTaskTime(this.draggedTask.id, newDate, newEndDate);
+                    
+                    // 성공 피드백
+                    calendarDay.style.backgroundColor = '#28a745';
+                    calendarDay.style.transition = 'background-color 0.3s';
+                    setTimeout(() => {
+                        calendarDay.style.backgroundColor = '';
+                        calendarDay.style.transition = '';
+                    }, 300);
+                    
+                    // 성공 알림
+                    this.showNotification(`할일이 ${month + 1}월 ${day}일로 이동되었습니다.`, 'success');
+                }
+            }
         }
         
-        // 드래그 오버 스타일 제거
+        // 드래그 상태 정리
         document.querySelectorAll('.calendar-day').forEach(day => {
-            day.classList.remove('drag-over');
+            day.classList.remove('drag-over', 'drag-disabled');
         });
         
         this.draggedTask = null;
-        this.isDragging = false;
     }
 
     // 리사이즈 처리
@@ -2108,35 +2214,90 @@ class SmartScheduler {
 
     // 월간 뷰 드래그 오버 처리
     handleMonthDragOver(e) {
+        e.preventDefault();
+        e.stopPropagation();
         const monthDay = e.target.closest('.month-day');
-        if (monthDay) {
+        if (monthDay && this.draggedTask) {
+            // 기존 하이라이트 제거
+            document.querySelectorAll('.month-day.drag-over').forEach(day => {
+                day.classList.remove('drag-over');
+            });
             monthDay.classList.add('drag-over');
+            
+            // 드래그 가능한 날짜인지 확인 (과거 날짜 제외)
+            const dayNumber = monthDay.querySelector('.month-day-number');
+            if (dayNumber) {
+                const day = parseInt(dayNumber.textContent);
+                const year = this.currentDate.getFullYear();
+                const month = this.currentDate.getMonth();
+                const targetDate = new Date(year, month, day);
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                
+                if (targetDate < today) {
+                    monthDay.classList.add('drag-disabled');
+                } else {
+                    monthDay.classList.remove('drag-disabled');
+                }
+            }
         }
     }
 
     // 월간 뷰 드롭 처리
     handleMonthDrop(e) {
+        e.preventDefault();
+        e.stopPropagation();
         const monthDay = e.target.closest('.month-day');
         if (monthDay && this.draggedTask) {
             const dayNumber = monthDay.querySelector('.month-day-number');
-            const day = parseInt(dayNumber.textContent);
-            const year = this.currentDate.getFullYear();
-            const month = this.currentDate.getMonth();
-            
-            const newDate = new Date(year, month, day);
-            const currentStartTime = new Date(this.draggedTask.startTime);
-            const currentEndTime = new Date(this.draggedTask.endTime);
-            const duration = currentEndTime.getTime() - currentStartTime.getTime();
-            
-            newDate.setHours(currentStartTime.getHours(), currentStartTime.getMinutes(), 0, 0);
-            const newEndDate = new Date(newDate.getTime() + duration);
-            
-            this.updateTaskTime(this.draggedTask.id, newDate, newEndDate);
+            if (dayNumber) {
+                const day = parseInt(dayNumber.textContent);
+                const year = this.currentDate.getFullYear();
+                const month = this.currentDate.getMonth();
+                const targetDate = new Date(year, month, day);
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                
+                // 과거 날짜로 드롭 방지
+                if (targetDate < today) {
+                    // 에러 피드백
+                    monthDay.style.backgroundColor = '#dc3545';
+                    monthDay.style.transition = 'background-color 0.3s';
+                    setTimeout(() => {
+                        monthDay.style.backgroundColor = '';
+                        monthDay.style.transition = '';
+                    }, 300);
+                    
+                    // 알림 메시지
+                    this.showNotification('과거 날짜로는 할일을 이동할 수 없습니다.', 'error');
+                } else {
+                    const newDate = new Date(year, month, day);
+                    const currentStartTime = new Date(this.draggedTask.startTime);
+                    const currentEndTime = new Date(this.draggedTask.endTime);
+                    const duration = currentEndTime.getTime() - currentStartTime.getTime();
+                    
+                    newDate.setHours(currentStartTime.getHours(), currentStartTime.getMinutes(), 0, 0);
+                    const newEndDate = new Date(newDate.getTime() + duration);
+                    
+                    this.updateTaskTime(this.draggedTask.id, newDate, newEndDate);
+                    
+                    // 성공 피드백
+                    monthDay.style.backgroundColor = '#28a745';
+                    monthDay.style.transition = 'background-color 0.3s';
+                    setTimeout(() => {
+                        monthDay.style.backgroundColor = '';
+                        monthDay.style.transition = '';
+                    }, 300);
+                    
+                    // 성공 알림
+                    this.showNotification(`할일이 ${month + 1}월 ${day}일로 이동되었습니다.`, 'success');
+                }
+            }
         }
         
-        // 드래그 오버 스타일 제거
+        // 드래그 상태 정리
         document.querySelectorAll('.month-day').forEach(day => {
-            day.classList.remove('drag-over');
+            day.classList.remove('drag-over', 'drag-disabled');
         });
         
         this.draggedTask = null;
