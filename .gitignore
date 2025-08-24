@@ -1,0 +1,23 @@
+# 운영체제 관련
+.DS_Store
+Thumbs.db
+
+# IDE 관련
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# 로그 파일
+*.log
+
+# 임시 파일
+*.tmp
+*.temp
+
+# Node.js (필요시)
+node_modules/
+npm-debug.log*
+
+# 개인 설정 파일
+config.local.js
