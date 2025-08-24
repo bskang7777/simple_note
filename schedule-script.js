@@ -348,13 +348,49 @@ class SmartScheduler {
 
         // 캘린더 뷰 드래그 앤 드롭
         this.calendarView.addEventListener('dragover', (e) => {
-            e.preventDefault();
             this.handleCalendarDragOver(e);
         });
 
         this.calendarView.addEventListener('drop', (e) => {
-            e.preventDefault();
             this.handleCalendarDrop(e);
+        });
+        
+        this.calendarView.addEventListener('dragleave', (e) => {
+            if (!this.calendarView.contains(e.relatedTarget)) {
+                document.querySelectorAll('.calendar-day.drag-over').forEach(day => {
+                    day.classList.remove('drag-over', 'drag-disabled');
+                });
+            }
+        });
+
+        // 주간 뷰 드래그 앤 드롭
+        this.weekView.addEventListener('dragover', (e) => {
+            this.handleWeekDragOver(e);
+        });
+        
+        this.weekView.addEventListener('drop', (e) => {
+            this.handleWeekDrop(e);
+        });
+        
+        this.weekView.addEventListener('dragleave', (e) => {
+            if (!this.weekView.contains(e.relatedTarget)) {
+                this.cleanupWeekDragState();
+            }
+        });
+
+        // 월간 뷰 드래그 앤 드롭
+        this.monthView.addEventListener('dragover', (e) => {
+            this.handleMonthDragOver(e);
+        });
+        
+        this.monthView.addEventListener('drop', (e) => {
+            this.handleMonthDrop(e);
+        });
+        
+        this.monthView.addEventListener('dragleave', (e) => {
+            if (!this.monthView.contains(e.relatedTarget)) {
+                this.cleanupMonthDragState();
+            }
         });
 
         // 리사이즈 이벤트
@@ -628,45 +664,6 @@ class SmartScheduler {
         
         // 편집 모달 열기
         this.openTaskModal(taskData);
-    }
-
-    // 드래그 앤 드롭 이벤트 바인딩
-    bindDragAndDropEvents() {
-        // 타임라인 뷰 드래그 앤 드롭
-        this.timelineView.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            this.handleDragOver(e);
-        });
-
-        this.timelineView.addEventListener('drop', (e) => {
-            e.preventDefault();
-            this.handleDrop(e);
-        });
-
-        // 캘린더 뷰 드래그 앤 드롭
-        this.calendarView.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            this.handleCalendarDragOver(e);
-        });
-
-        this.calendarView.addEventListener('drop', (e) => {
-            e.preventDefault();
-            this.handleCalendarDrop(e);
-        });
-
-        // 리사이즈 이벤트
-        document.addEventListener('mousemove', (e) => {
-            if (this.isResizing) {
-                this.handleResize(e);
-            }
-        });
-
-        document.addEventListener('mouseup', () => {
-            if (this.isResizing) {
-                this.isResizing = false;
-                this.resizeHandle = null;
-            }
-        });
     }
 
     // 드래그 오버 처리 (타임라인)
@@ -1383,22 +1380,55 @@ class SmartScheduler {
                     monthTask.textContent = task.title;
                     monthTask.style.backgroundColor = task.color;
                     monthTask.style.color = 'white';
+                    monthTask.style.cursor = 'move';
                     monthTask.draggable = true;
                     monthTask.dataset.taskId = task.id;
                     
-                    // 드래그 이벤트
+                    // Google Calendar 스타일 드래그 이벤트
                     monthTask.addEventListener('dragstart', (e) => {
                         this.draggedTask = task;
                         this.isDragging = true;
+                        this.dragStartPosition = {
+                            x: e.clientX,
+                            y: e.clientY,
+                            taskRect: monthTask.getBoundingClientRect()
+                        };
+                        
+                        // 커스텀 드래그 이미지
+                        const dragImage = monthTask.cloneNode(true);
+                        dragImage.style.opacity = '0.8';
+                        dragImage.style.transform = 'rotate(3deg) scale(1.05)';
+                        dragImage.style.boxShadow = '0 8px 25px rgba(0,0,0,0.3)';
+                        dragImage.style.borderRadius = '6px';
+                        document.body.appendChild(dragImage);
+                        e.dataTransfer.setDragImage(dragImage, e.offsetX, e.offsetY);
+                        setTimeout(() => document.body.removeChild(dragImage), 0);
+                        
                         e.dataTransfer.effectAllowed = 'move';
                         monthTask.classList.add('dragging');
+                        monthTask.style.cursor = 'move';
+                        
+                        // 시작 알림
+                        this.showNotification('할일을 원하는 날짜로 드래그하세요', 'info');
                     });
 
                     monthTask.addEventListener('dragend', () => {
                         monthTask.classList.remove('dragging');
+                        monthTask.style.cursor = 'move';
+                        this.cleanupDragState();
                     });
                     
-                    monthTask.addEventListener('click', () => this.openTaskModal(task));
+                    // 더블클릭으로 편집
+                    monthTask.addEventListener('dblclick', (e) => {
+                        e.stopPropagation();
+                        this.openTaskModal(task);
+                    });
+                    
+                    // 단일 클릭으로 선택
+                    monthTask.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        this.selectTask(monthTask, task);
+                    });
                     dayTasks.appendChild(monthTask);
                 });
                 
@@ -2166,51 +2196,7 @@ class SmartScheduler {
         return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
     }
 
-    // 주간 뷰 드래그 오버 처리
-    handleWeekDragOver(e) {
-        const daySlot = e.target.closest('.week-day-slot');
-        if (daySlot) {
-            daySlot.classList.add('drag-over');
-        }
-    }
-
-    // 주간 뷰 드롭 처리
-    handleWeekDrop(e) {
-        const daySlot = e.target.closest('.week-day-slot');
-        if (daySlot && this.draggedTask) {
-            const weekGrid = this.weekView.querySelector('.week-grid');
-            const gridRect = weekGrid.getBoundingClientRect();
-            const dayIndex = Math.floor((e.clientX - gridRect.left) / (gridRect.width / 7));
-            const hourIndex = Math.floor((e.clientY - gridRect.top) / (gridRect.height / 24));
-            
-            // 현재 주의 시작일 계산
-            const currentDate = new Date(this.currentDate);
-            const dayOfWeek = currentDate.getDay();
-            const weekStart = new Date(currentDate);
-            weekStart.setDate(currentDate.getDate() - dayOfWeek);
-            
-            // 새로운 날짜 계산
-            const newDate = new Date(weekStart);
-            newDate.setDate(weekStart.getDate() + dayIndex);
-            newDate.setHours(hourIndex, 0, 0, 0);
-            
-            const currentStartTime = new Date(this.draggedTask.startTime);
-            const currentEndTime = new Date(this.draggedTask.endTime);
-            const duration = currentEndTime.getTime() - currentStartTime.getTime();
-            
-            const newEndDate = new Date(newDate.getTime() + duration);
-            
-            this.updateTaskTime(this.draggedTask.id, newDate, newEndDate);
-        }
-        
-        // 드래그 오버 스타일 제거
-        document.querySelectorAll('.week-day-slot').forEach(slot => {
-            slot.classList.remove('drag-over');
-        });
-        
-        this.draggedTask = null;
-        this.isDragging = false;
-    }
+    // 이미 위에서 구현된 Google Calendar 스타일 함수들로 대체됨
 
     // 월간 뷰 드래그 오버 처리
     handleMonthDragOver(e) {
@@ -2302,6 +2288,104 @@ class SmartScheduler {
         
         this.draggedTask = null;
         this.isDragging = false;
+    }
+    
+    // 드래그 상태 정리 함수들
+    cleanupDragState() {
+        document.querySelectorAll('.drag-over, .dragging').forEach(element => {
+            element.classList.remove('drag-over', 'dragging', 'drag-disabled');
+        });
+        
+        // 드래그 프리뷰 제거
+        const preview = document.querySelector('.drag-preview');
+        if (preview) {
+            preview.remove();
+        }
+        
+        this.draggedTask = null;
+        this.isDragging = false;
+        this.dragStartPosition = null;
+    }
+    
+    cleanupWeekDragState() {
+        document.querySelectorAll('.week-day-slot.drag-over').forEach(slot => {
+            slot.classList.remove('drag-over');
+        });
+        this.removeDragPreview();
+    }
+    
+    cleanupMonthDragState() {
+        document.querySelectorAll('.month-day.drag-over, .month-day.drag-disabled').forEach(day => {
+            day.classList.remove('drag-over', 'drag-disabled');
+        });
+    }
+    
+    // 드래그 프리뷰 표시 (Google Calendar 스타일)
+    showDragPreview(container, dayIndex, minutes, event) {
+        this.removeDragPreview();
+        
+        if (!this.draggedTask) return;
+        
+        const preview = document.createElement('div');
+        preview.className = 'drag-preview';
+        preview.style.cssText = `
+            position: absolute;
+            background: rgba(102, 126, 234, 0.3);
+            border: 2px dashed #667eea;
+            border-radius: 4px;
+            pointer-events: none;
+            z-index: 1000;
+            font-size: 12px;
+            padding: 2px 4px;
+            color: #333;
+            font-weight: 500;
+        `;
+        
+        // 시간 포맷팅
+        const hour = Math.floor(minutes / 60);
+        const min = minutes % 60;
+        const timeStr = `${hour.toString().padStart(2, '0')}:${min.toString().padStart(2, '0')}`;
+        
+        preview.textContent = `${this.draggedTask.title} - ${timeStr}`;
+        
+        // 위치 계산
+        const containerRect = container.getBoundingClientRect();
+        preview.style.left = `${containerRect.left + 2}px`;
+        preview.style.top = `${containerRect.top + (minutes / 60) * containerRect.height}px`;
+        preview.style.width = `${containerRect.width - 4}px`;
+        preview.style.height = '20px';
+        
+        document.body.appendChild(preview);
+    }
+    
+    removeDragPreview() {
+        const preview = document.querySelector('.drag-preview');
+        if (preview) {
+            preview.remove();
+        }
+    }
+    
+    // 할일 선택 함수
+    selectTask(taskElement, task) {
+        // 기존 선택 제거
+        document.querySelectorAll('.week-task.selected, .month-task.selected').forEach(el => {
+            el.classList.remove('selected');
+        });
+        
+        // 새 선택 적용
+        taskElement.classList.add('selected');
+        
+        // 선택된 할일 정보 표시 (옵션)
+        this.showTaskInfo(task);
+    }
+    
+    showTaskInfo(task) {
+        // 간단한 할일 정보 표시 (필요에 따라 구현)
+        const startTime = new Date(task.startTime);
+        const endTime = new Date(task.endTime);
+        
+        console.log(`선택된 할일: ${task.title}`);
+        console.log(`시간: ${startTime.toLocaleString()} - ${endTime.toLocaleString()}`);
     }
 }
 

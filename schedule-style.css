@@ -1097,6 +1097,168 @@ body {
     }
 }
 
+/* Google Calendar 스타일 드래그 앤 드롭 개선 */
+.week-task {
+    position: absolute;
+    left: 2px;
+    right: 2px;
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-size: 12px;
+    font-weight: 500;
+    color: white;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    cursor: move;
+    transition: all 0.2s ease;
+    border: 1px solid rgba(255,255,255,0.2);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.week-task:hover {
+    transform: scale(1.02);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    z-index: 10;
+}
+
+.week-task.selected {
+    box-shadow: 0 0 0 2px #667eea, 0 4px 12px rgba(102, 126, 234, 0.3);
+    z-index: 15;
+}
+
+.week-task.dragging {
+    opacity: 0.6;
+    transform: rotate(5deg) scale(1.1);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+    z-index: 1000;
+    animation: dragBounce 0.3s ease;
+}
+
+.month-task {
+    margin: 1px 0;
+    padding: 1px 4px;
+    border-radius: 3px;
+    font-size: 11px;
+    font-weight: 500;
+    cursor: move;
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.month-task:hover {
+    transform: scale(1.05);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    z-index: 10;
+}
+
+.month-task.selected {
+    box-shadow: 0 0 0 2px #667eea, 0 2px 8px rgba(102, 126, 234, 0.3);
+    z-index: 15;
+}
+
+.month-task.dragging {
+    opacity: 0.7;
+    transform: rotate(3deg) scale(1.1);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+    z-index: 1000;
+    animation: dragBounce 0.3s ease;
+}
+
+/* 주간 뷰 드래그 오버 스타일 개선 */
+.week-day-slot {
+    position: relative;
+    border: 1px solid #e9ecef;
+    transition: all 0.2s ease;
+}
+
+.week-day-slot.drag-over {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(102, 126, 234, 0.2));
+    border-color: #667eea;
+    box-shadow: inset 0 0 10px rgba(102, 126, 234, 0.3);
+    animation: dragPulse 1s infinite alternate;
+}
+
+/* 월간 뷰 드래그 오버 스타일 개선 */
+.month-day.drag-over {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(102, 126, 234, 0.2));
+    border: 2px dashed #667eea;
+    animation: dragPulse 1s infinite alternate;
+    transform: scale(1.02);
+}
+
+.month-day.drag-disabled {
+    background: linear-gradient(135deg, rgba(220, 53, 69, 0.1), rgba(220, 53, 69, 0.2));
+    border: 2px dashed #dc3545;
+    cursor: not-allowed;
+    animation: shakeDeny 0.5s ease;
+}
+
+/* 드래그 프리뷰 스타일 */
+.drag-preview {
+    backdrop-filter: blur(5px);
+    animation: fadeInScale 0.2s ease;
+}
+
+/* 애니메이션 추가 */
+@keyframes dragBounce {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1.05); }
+}
+
+@keyframes shakeDeny {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* 주간 뷰 타임 슬롯 개선 */
+.week-time-slot {
+    background: #f8f9fa;
+    border-right: 1px solid #dee2e6;
+    font-size: 11px;
+    color: #6c757d;
+    text-align: center;
+    padding: 4px 2px;
+    font-weight: 500;
+}
+
+.week-day-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    font-weight: 600;
+    text-align: center;
+    padding: 8px 4px;
+    font-size: 13px;
+}
+
+/* 반응형 드래그 개선 */
+@media (max-width: 768px) {
+    .week-task, .month-task {
+        font-size: 10px;
+        padding: 1px 3px;
+    }
+    
+    .week-task.dragging, .month-task.dragging {
+        transform: scale(1.2);
+    }
+}
+
 /* 모달 */
 .modal {
     display: none;
